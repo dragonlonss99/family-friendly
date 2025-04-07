@@ -5,13 +5,11 @@ import { Alert } from "antd";
 import ShopList from "@/components/ShopList";
 import ProductInfoListProvider from "@/context/ProductInfoProvider";
 import LocationProvider from "@/context/LocationProvider";
-import ClassificationProvider from "@/context/ClassificationProvider";
 
 const Page = () => {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
 
   return (
-    <ClassificationProvider>
       <LocationProvider warningCallback={() => setIsAlertVisible(true)}>
         <ProductInfoListProvider>
           <div className="relative">
@@ -30,7 +28,6 @@ const Page = () => {
           </div>
         </ProductInfoListProvider>
       </LocationProvider>
-    </ClassificationProvider>
   );
 };
 

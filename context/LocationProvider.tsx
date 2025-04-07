@@ -1,4 +1,10 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+} from "react";
 
 export const LocationContext = createContext<{
   location: {
@@ -32,27 +38,27 @@ const LocationProvider = ({
     longitude: number;
     timestamp: number;
   } | null>(null);
-  const defaultUseLocation = typeof localStorage !== "undefined"
-    ? localStorage.getItem("useLocation") === "true"
-    : false;
+  const defaultUseLocation = useMemo(() => {
+    return typeof localStorage !== "undefined"
+      ? localStorage.getItem("useLocation") === "true"
+      : false;
+  }, []);
   const setDefaultUseLocationToLocalStorage = (useLocation: boolean) => {
     localStorage.setItem("useLocation", useLocation.toString());
   };
-  // const [useLocation, setUseLocation] = useState(defaultUseLocation);
 
   const getLocation = () => {
-    if (navigator.geolocation && !location) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          timestamp: position.timestamp,
-        });
-      });
-    } else {
+    if (!navigator.geolocation) {
       console.error("Geolocation is not supported by this browser.");
       warningCallback();
     }
+    navigator.geolocation.getCurrentPosition((position) => {
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        timestamp: position.timestamp,
+      });
+    });
   };
   useEffect(() => {
     if (defaultUseLocation) {

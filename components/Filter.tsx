@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { CaretDownOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { CityList } from "@/data/city";
-import { getFriendlyContent } from "@/util/api";
 import { Dropdown, Space, Button, Modal } from "antd";
 import { useProductInfoList } from "@/context/ProductInfoProvider";
 import { useLocation } from "@/context/LocationProvider";
@@ -14,14 +13,14 @@ const Filter = () => {
     name: string;
     code: string | number;
   } | null>(null);
-  const { updateProductInfoList } = useProductInfoList();
   const {
-    location,
     getLocation,
+    location,
     defaultUseLocation,
     setDefaultUseLocationToLocalStorage,
   } = useLocation();
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const { getFriendlyContentList } = useProductInfoList();
   const locationItems: MenuProps["items"] = CityList.map((city) => ({
     key: city.name,
     label: city.name,
@@ -46,7 +45,7 @@ const Filter = () => {
     })(),
   }));
 
-  const handleClickLocation = () => {
+  const handleClickLocation = async () => {
     getLocation();
     if (!defaultUseLocation) {
       setIsLocationModalOpen(true);
@@ -62,22 +61,22 @@ const Filter = () => {
   };
 
   useEffect(() => {
-    if (selectedCity) {
-      const { latitude, longitude } = location || { latitude: 0, longitude: 0 };
-      getFriendlyContent(selectedCity.code as string, latitude, longitude).then(
-        (res) => {
-          updateProductInfoList(res);
-        }
-      );
-    } else {
-      if (location) {
-        const { latitude, longitude } = location;
-        getFriendlyContent("", latitude, longitude).then((res) => {
-          updateProductInfoList(res);
+    if (!!location && !!location.latitude && !!location.longitude) {
+      const { latitude, longitude } = location;
+      if (selectedCity) {
+        getFriendlyContentList({
+          latitude,
+          longitude,
+          postCode: selectedCity.code,
+        });
+      } else {
+        getFriendlyContentList({
+          latitude,
+          longitude,
         });
       }
     }
-  }, [selectedCity, location, updateProductInfoList]);
+  }, [location, selectedCity]);
 
   return (
     <div className="border-b-gray-200 border-b-1 px-4 p-4">

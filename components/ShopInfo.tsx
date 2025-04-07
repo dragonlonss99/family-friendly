@@ -18,6 +18,7 @@ const ShopInfo = ({ shopInfo }: { shopInfo: any }) => {
     tel,
     updateDate,
   } = shopInfo;
+  console.log({ shopInfo });
   return (
     <div className="border-b-gray-200 border-b-1 pb-4">
       <div className="flex justify-between">
@@ -31,8 +32,9 @@ const ShopInfo = ({ shopInfo }: { shopInfo: any }) => {
             alt="direction"
             width={20}
             height={20}
+            className="pb-1"
           />
-          <span className="text-sm">{distance}m</span>
+          <span className="text-sm">{distance ? distance : "---"}m</span>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:gap-4 bg-[#EEFBFC] p-4">

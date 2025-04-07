@@ -7,7 +7,7 @@ import ProductInfoListProvider from "@/context/ProductInfoProvider";
 import LocationProvider from "@/context/LocationProvider";
 import ClassificationProvider from "@/context/ClassificationProvider";
 
-const page = () => {
+const Page = () => {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
 
   return (
@@ -34,4 +34,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

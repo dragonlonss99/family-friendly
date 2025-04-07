@@ -77,7 +77,7 @@ const Filter = () => {
         });
       }
     }
-  }, [selectedCity, location]);
+  }, [selectedCity, location, updateProductInfoList]);
 
   return (
     <div className="border-b-gray-200 border-b-1 px-4 p-4">

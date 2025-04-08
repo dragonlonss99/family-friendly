@@ -76,7 +76,7 @@ const Filter = () => {
         });
       }
     }
-  }, [location, selectedCity]);
+  }, [location, selectedCity, getFriendlyContentList]);
 
   return (
     <div className="border-b-gray-200 border-b-1 px-4 p-4">

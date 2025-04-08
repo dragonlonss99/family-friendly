@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 const getdefaultIcon = (code: string) => {
   switch (code) {
     case "A":
@@ -35,9 +36,9 @@ const ProductGroup = ({
   setSelectedProductGroup?: (code: string) => void;
 }) => {
   const { categories, code, iconURL, name, qty } = productGroupInfo;
+  const pathname = usePathname();
   if (!qty) return null;
   const imageSrc = iconURL || getdefaultIcon(code);
-  const pathname = usePathname();
   const isShopPage = pathname.includes("/shop");
   const isSelected = selectedProductGroup === code;
   const handleClick = (e: any) => {

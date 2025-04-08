@@ -1,13 +1,17 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import ProductGroup from "./ProductGroup";
 import Image from "next/image";
 import ProductList from "./ProductList";
 import { getShopInfo } from "@/util/api";
+import { useSearchParams, useParams } from "next/navigation";
 
-const ShopInfo = ({ shopKey, code }: { shopKey: string; code: string }) => {
+const ShopInfo = () => {
   const [shopInfo, setShopInfo] = useState<any>(null);
-  // const { address, distance, info, name, oldPKey } = shopInfo || {};
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const shopKey = params.shopKey as string;
+  const code = searchParams.get("code") as string;
 
   const [selectedProductGroup, setSelectedProductGroup] = useState<string>("");
   const productListData = useMemo(() => {
@@ -16,7 +20,7 @@ const ShopInfo = ({ shopKey, code }: { shopKey: string; code: string }) => {
     );
   }, [selectedProductGroup, shopInfo]);
 
-  const fetchShopInfo = async () => {
+  const fetchShopInfo = useCallback(async () => {
     const locationItem = localStorage.getItem("location");
     const location = locationItem ? JSON.parse(locationItem) : null;
     const latitude = location?.latitude || 0;
@@ -24,10 +28,10 @@ const ShopInfo = ({ shopKey, code }: { shopKey: string; code: string }) => {
 
     const shopInfoData = await getShopInfo(shopKey, latitude, longitude);
     setShopInfo(shopInfoData[0]);
-  };
+  }, [shopKey]);
   useEffect(() => {
     fetchShopInfo();
-  }, []);
+  }, [fetchShopInfo]);
 
   useEffect(() => {
     setSelectedProductGroup(code || shopInfo?.info[0].code);
@@ -48,10 +52,14 @@ const ShopInfo = ({ shopKey, code }: { shopKey: string; code: string }) => {
               height={20}
               className="pb-1"
             />
-            <span className="text-sm">{shopInfo?.distance ? shopInfo?.distance : "---"}m</span>
+            <span className="text-sm">
+              {shopInfo?.distance ? shopInfo?.distance : "---"}m
+            </span>
           </div>
         </div>
-        <div className="px-4 pb-2 text-sm text-gray-500">{shopInfo?.address}</div>
+        <div className="px-4 pb-2 text-sm text-gray-500">
+          {shopInfo?.address}
+        </div>
         <div className="grid grid-cols-4 gap-2 sm:gap-4 bg-[#EEFBFC] p-4">
           {shopInfo?.info?.map((productGroupInfo: any) => (
             <ProductGroup

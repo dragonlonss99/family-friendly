@@ -2,6 +2,8 @@ import React from "react";
 import ProductGroup from "./ProductGroup";
 import { RightOutlined } from "@ant-design/icons";
 import Image from "next/image";
+import Link from "next/link";
+
 const ShopInfo = ({ shopInfo }: { shopInfo: any }) => {
   const {
     address,
@@ -18,14 +20,17 @@ const ShopInfo = ({ shopInfo }: { shopInfo: any }) => {
     tel,
     updateDate,
   } = shopInfo;
-  console.log({ shopInfo });
+
   return (
     <div className="border-b-gray-200 border-b-1 pb-4">
       <div className="flex justify-between">
-        <div className="px-4 py-4 flex gap-2 items-center">
+        <Link
+          href={`/shop/${oldPKey}`}
+          className="px-4 py-4 flex gap-2 items-center"
+        >
           <span className="text-xl font-bold">{name}</span>
           <RightOutlined />
-        </div>
+        </Link>
         <div className="px-4 py-4 flex gap-1 items-center">
           <Image
             src="/img/direction.svg"
@@ -42,6 +47,7 @@ const ShopInfo = ({ shopInfo }: { shopInfo: any }) => {
           <ProductGroup
             key={productGroupInfo.code}
             productGroupInfo={productGroupInfo}
+            shopKey={oldPKey}
           />
         ))}
       </div>

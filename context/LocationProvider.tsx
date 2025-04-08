@@ -58,6 +58,11 @@ const LocationProvider = ({
         longitude: position.coords.longitude,
         timestamp: position.timestamp,
       });
+      localStorage.setItem("location", JSON.stringify({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        timestamp: position.timestamp,
+      }));
     });
   };
   useEffect(() => {

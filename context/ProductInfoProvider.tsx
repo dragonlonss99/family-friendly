@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { getClassification, getFriendlyContent } from "@/util/api";
 import { getProductNameList } from "@/util/productInfoUtil";
 import { useLocation } from "@/context/LocationProvider";
+
 export const ProductInfoListContext = createContext<{
   productInfoList: {
     address: string;

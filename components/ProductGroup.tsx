@@ -1,5 +1,6 @@
 import Image from "next/image";
-
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 const getdefaultIcon = (code: string) => {
   switch (code) {
     case "A":
@@ -22,18 +23,43 @@ const getdefaultIcon = (code: string) => {
       return "";
   }
 };
-const ProductGroup = ({ productGroupInfo }: { productGroupInfo: any }) => {
+const ProductGroup = ({
+  productGroupInfo,
+  shopKey,
+  selectedProductGroup,
+  setSelectedProductGroup,
+}: {
+  productGroupInfo: any;
+  shopKey: string;
+  selectedProductGroup?: string;
+  setSelectedProductGroup?: (code: string) => void;
+}) => {
   const { categories, code, iconURL, name, qty } = productGroupInfo;
   if (!qty) return null;
   const imageSrc = iconURL || getdefaultIcon(code);
+  const pathname = usePathname();
+  const isShopPage = pathname.includes("/shop");
+  const isSelected = selectedProductGroup === code;
+  const handleClick = (e: any) => {
+    if (!isShopPage) return;
+    e.preventDefault();
+    setSelectedProductGroup?.(code);
+    history.pushState(null, '', `/shop/${shopKey}?code=${code}`);
+  };
   return (
-    <div className="flex flex-col items-center gap-1 bg-white rounded-md p-2 text-black">
+    <Link
+      href={`/shop/${shopKey}?code=${code}`}
+      className={`flex flex-col items-center gap-1 rounded-md p-2 text-black cursor-pointer ${
+        isShopPage && !isSelected ? "bg-[#F3FCFD]" : "bg-white"
+      }`}
+      onClick={handleClick}
+    >
       {imageSrc && (
         <Image src={imageSrc} alt={name || code} width={32} height={32} />
       )}
       <div className="text-xs sm:text-lg">{name || code}</div>
       <div className="text-sm sm:text-lg font-bold">{qty}</div>
-    </div>
+    </Link>
   );
 };
 

@@ -7,8 +7,8 @@ export const getFriendlyContent = async (
   latitude: number = 0,
   longitude: number = 0
 ) => {
-  const result = await fetchInfoByPost(postCode);
-  return result.data;
+  // const result = await fetchInfoByPost(postCode);
+  // return result.data;
 
   const path = FAMILY_API_URL + "/MapProductInfo";
   const response = await fetch(path, {
@@ -24,17 +24,36 @@ export const getFriendlyContent = async (
       "Content-Type": "application/json",
     },
   });
-//   const result = await response.json();
+  const result = await response.json();
   return result.data;
 };
 
 export const getClassification = async () => {
-  const result = await fetchClassification();
-  return result.data;
+  // const result = await fetchClassification();
+  // return result.data;
   const path = `${FAMILY_API_URL}/MapClassificationInfo?ProjectCode=${FAMILY_API_PROJECT_CODE}`;
   const response = await fetch(path, {
     method: "GET",
   });
-//   const result = await response.json();
+  const result = await response.json();
+  return result.data;
+};
+
+export const getShopInfo = async (shopKey: string, latitude: number, longitude: number) => {
+  const path = `${FAMILY_API_URL}/MapProductInfo`;
+  const response = await fetch(path, {
+    method: "POST",
+    body: JSON.stringify({
+      PostInfo: "",
+      Latitude: latitude,
+      Longitude: longitude,
+      OldPKeys: [shopKey],
+      ProjectCode: FAMILY_API_PROJECT_CODE,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const result = await response.json();
   return result.data;
 };

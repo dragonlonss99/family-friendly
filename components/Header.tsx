@@ -16,7 +16,7 @@ const Header = () => {
           <LeftOutlined />
         </Link>
       )}
-      <div className="flex justify-center items-center">尋找友善時光🥺</div>
+      <div className="flex justify-center items-center">尋找友善時光</div>
     </header>
   );
 };

@@ -13,11 +13,11 @@ const ShopList = () => {
 
   return (
     <div>
-      {filteredProductInfoList.length ? (
-        filteredProductInfoList
-          .map((shopInfo: any) => (
-            <ShopInfo key={shopInfo.oldPKey} shopInfo={shopInfo} />
-          ))
+      {(Array.isArray(filteredProductInfoList) &&
+      filteredProductInfoList.length) ? (
+        filteredProductInfoList.map((shopInfo: any) => (
+          <ShopInfo key={shopInfo.oldPKey} shopInfo={shopInfo} />
+        ))
       ) : (
         <Empty description="找不到任何結果" className="my-20" />
       )}

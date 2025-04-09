@@ -92,6 +92,7 @@ const ProductInfoListProvider = ({
   };
   const treeItemClick = (newValue: string[]) => {
     setTreeSelectValue(newValue);
+    localStorage.setItem("productTreeSelect", JSON.stringify(newValue));
   };
 
   useEffect(() => {

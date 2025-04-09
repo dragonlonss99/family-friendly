@@ -9,10 +9,6 @@ const ProductTreeSelect: React.FC = () => {
 
   const treeData = mapProductInfoListToTreeData(classification);
 
-  const handleClick = () => {
-    localStorage.setItem("productTreeSelect", JSON.stringify(treeSelectValue));
-  };
-
   return (
     <div className="py-4 flex gap-2 items-center">
       <TreeSelect
@@ -27,10 +23,13 @@ const ProductTreeSelect: React.FC = () => {
         onChange={treeItemClick}
         treeData={treeData}
         className="w-full"
+        size="large"
       />
-      <Button type="primary" onClick={handleClick} className="self-end">
-        記住選擇的商品
-      </Button>
+      <style jsx global>{`
+        .ant-select-tree {
+          font-size: 16px !important;
+        }
+      `}</style>
     </div>
   );
 };

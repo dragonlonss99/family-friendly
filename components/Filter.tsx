@@ -4,7 +4,6 @@ import type { MenuProps } from "antd";
 import { CityList } from "@/data/city";
 import { Dropdown, Space, Button, Modal } from "antd";
 import { useProductInfoList } from "@/context/ProductInfoProvider";
-import { useLocation } from "@/context/LocationProvider";
 import ProductTreeSelect from "./ProductTreeSelect";
 
 const Filter = () => {
@@ -13,14 +12,11 @@ const Filter = () => {
     name: string;
     code: string | number;
   } | null>(null);
-  const {
-    getLocation,
-    location,
-    defaultUseLocation,
-    setDefaultUseLocationToLocalStorage,
-  } = useLocation();
+
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const { getFriendlyContentList } = useProductInfoList();
+  const { getFriendlyContentList, getLocation, location } =
+    useProductInfoList();
+
   const locationItems: MenuProps["items"] = CityList.map((city) => ({
     key: city.name,
     label: city.name,
@@ -31,6 +27,14 @@ const Filter = () => {
           label: "不限",
           onClick: () => {
             setSelectedCity({ name: city.name, code: city.name });
+            if (location) {
+              const { latitude, longitude } = location;
+              getFriendlyContentList({
+                latitude,
+                longitude,
+                postCode: city.name,
+              });
+            }
           },
         },
         ...city.districts.map((district) => ({
@@ -38,6 +42,14 @@ const Filter = () => {
           label: district.name,
           onClick: () => {
             setSelectedCity({ name: district.name, code: district.code });
+            if (location) {
+              const { latitude, longitude } = location;
+              getFriendlyContentList({
+                latitude,
+                longitude,
+                postCode: district.code,
+              });
+            }
           },
         })),
       ];
@@ -47,36 +59,36 @@ const Filter = () => {
 
   const handleClickLocation = async () => {
     getLocation();
-    if (!defaultUseLocation) {
-      setIsLocationModalOpen(true);
-    }
+    // if (!defaultUseLocation) {
+    //   setIsLocationModalOpen(true);
+    // }
   };
   const handleOkLocation = () => {
     setIsLocationModalOpen(false);
-    setDefaultUseLocationToLocalStorage(true);
+    // setDefaultUseLocationToLocalStorage(true);
   };
   const handleCancelLocation = () => {
     setIsLocationModalOpen(false);
-    setDefaultUseLocationToLocalStorage(false);
+    // setDefaultUseLocationToLocalStorage(false);
   };
 
-  useEffect(() => {
-    if (!!location && !!location.latitude && !!location.longitude) {
-      const { latitude, longitude } = location;
-      if (selectedCity) {
-        getFriendlyContentList({
-          latitude,
-          longitude,
-          postCode: selectedCity.code,
-        });
-      } else {
-        getFriendlyContentList({
-          latitude,
-          longitude,
-        });
-      }
-    }
-  }, [location, selectedCity, getFriendlyContentList]);
+  // useEffect(() => {
+  //   if (!!location && !!location.latitude && !!location.longitude) {
+  //     const { latitude, longitude } = location;
+  //     if (selectedCity) {
+  //       getFriendlyContentList({
+  //         latitude,
+  //         longitude,
+  //         postCode: selectedCity.code,
+  //       });
+  //     } else {
+  //       getFriendlyContentList({
+  //         latitude,
+  //         longitude,
+  //       });
+  //     }
+  //   }
+  // }, [location, selectedCity, getFriendlyContentList]);
 
   return (
     <div className="border-b-gray-200 border-b-1 px-4 p-4">
@@ -99,9 +111,9 @@ const Filter = () => {
             </Space>
           </a>
         </Dropdown>
-        <Button onClick={handleClickLocation} type="primary">
-          {defaultUseLocation ? "重新取得目前位置" : "使用目前位置"}
-        </Button>
+        {/* <Button onClick={handleClickLocation} type="primary">
+          {location ? "重新取得目前位置" : "使用目前位置"}
+        </Button> */}
         {/* <div>種類</div>
       <div>單品</div> */}
         <Modal

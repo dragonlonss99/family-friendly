@@ -1,7 +1,13 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import { getClassification, getFriendlyContent } from "@/util/api";
 import { getProductNameList } from "@/util/productInfoUtil";
-import { useLocation } from "@/context/LocationProvider";
 
 export const ProductInfoListContext = createContext<{
   productInfoList: {
@@ -23,12 +29,20 @@ export const ProductInfoListContext = createContext<{
   classification: any[];
   treeSelectValue: any[];
   treeItemClick: (newValue: string[]) => void;
+  location: {
+    latitude: number;
+    longitude: number;
+    timestamp: number;
+  } | null;
+  getLocation: () => void;
 }>({
   productInfoList: [],
   getFriendlyContentList: () => Promise.resolve(),
   classification: [],
   treeSelectValue: [],
   treeItemClick: () => {},
+  location: null,
+  getLocation: () => {},
 });
 
 export const useProductInfoList = () => {
@@ -37,8 +51,10 @@ export const useProductInfoList = () => {
 
 const ProductInfoListProvider = ({
   children,
+  warningCallback,
 }: {
   children: React.ReactNode;
+  warningCallback: () => void;
 }) => {
   const [productInfoList, setProductInfoList] = useState<
     {
@@ -58,28 +74,38 @@ const ProductInfoListProvider = ({
     }[]
   >([]);
   const [classification, setClassification] = useState([]);
-  const { defaultUseLocation, location } = useLocation();
   const defaultProductTreeSelect =
     typeof localStorage !== "undefined"
       ? JSON.parse(localStorage.getItem("productTreeSelect") || "[]")
       : [];
 
   const [treeSelectValue, setTreeSelectValue] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const isInitialized = useRef<boolean>(false);
 
-  const getFriendlyContentList = async ({
-    postCode = "",
-    latitude = 0,
-    longitude = 0,
-  }: {
-    postCode?: string;
-    latitude?: number;
-    longitude?: number;
-  }) => {
-    await getFriendlyContent(postCode, latitude, longitude).then((res: any) => {
-      setProductInfoList(res);
-    });
-  };
-  const getClassificationList = async () => {
+  const getFriendlyContentList = useCallback(
+    async ({
+      postCode = "",
+      latitude = 0,
+      longitude = 0,
+    }: {
+      postCode?: string;
+      latitude?: number;
+      longitude?: number;
+    }) => {
+      if (isLoading) return;
+      setIsLoading(true);
+      try {
+        const res = await getFriendlyContent(postCode, latitude, longitude);
+        setProductInfoList(res);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading]
+  );
+
+  const getClassificationList = useCallback(async () => {
     await getClassification().then((res: any) => {
       setClassification(res);
       const productNameList = getProductNameList(res);
@@ -89,30 +115,73 @@ const ProductInfoListProvider = ({
       );
       setTreeSelectValue(defaultSelect);
     });
-  };
+  }, [defaultProductTreeSelect]);
+
   const treeItemClick = (newValue: string[]) => {
     setTreeSelectValue(newValue);
     localStorage.setItem("productTreeSelect", JSON.stringify(newValue));
   };
 
-  useEffect(() => {
-    if (
-      defaultUseLocation &&
-      !!location &&
-      !!location.latitude &&
-      !!location.longitude
-    ) {
-      const { latitude, longitude } = location || {
-        latitude: 0,
-        longitude: 0,
-      };
-      Promise.all([
-        getClassificationList(),
-        getFriendlyContentList({ postCode: "", latitude, longitude }),
-      ]);
-    } else {
-      getClassificationList();
+  // location
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    timestamp: number;
+  } | null>(null);
+
+  const getLocation = useCallback(async () => {
+    if (!navigator.geolocation) {
+      console.error("Geolocation is not supported by this browser.");
+      warningCallback();
+      return null;
     }
+
+    return new Promise<{
+      latitude: number;
+      longitude: number;
+      timestamp: number;
+    } | null>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            timestamp: position.timestamp,
+          };
+          setLocation(newLocation);
+          localStorage.setItem("location", JSON.stringify(newLocation));
+          resolve(newLocation);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          warningCallback();
+          resolve(null);
+        }
+      );
+    });
+  }, [warningCallback]);
+
+  const initializeData = async () => {
+    if (isInitialized.current) return;
+
+    try {
+      const locationData = await getLocation();
+      await getClassificationList();
+
+      await getFriendlyContentList({
+        postCode: "",
+        latitude: locationData?.latitude || 0,
+        longitude: locationData?.longitude || 0,
+      });
+
+      isInitialized.current = true;
+    } catch (error) {
+      console.error("Error initializing data:", error);
+    }
+  };
+
+  useEffect(() => {
+    initializeData();
   }, []);
 
   return (
@@ -123,6 +192,8 @@ const ProductInfoListProvider = ({
         classification,
         treeSelectValue,
         treeItemClick,
+        location,
+        getLocation,
       }}
     >
       {children}
